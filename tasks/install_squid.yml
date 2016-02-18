@@ -1,0 +1,45 @@
+---
+# These tasks install squid and copy the neccessary acls
+
+- name: Install squid
+  yum: name=squid state=present
+
+- name: Create cache directory.
+  file: >
+    dest=/var/cache/squid
+    state=directory
+    owner=squid
+    group=squid
+    mode="u=rwx,g=rx,o=rx"
+
+# Sets ACLs and cache location.
+- name: Copy configuration file for squid.conf.
+  copy: >
+    src=/etc/squid/squid.conf
+    dest=/etc/squid/squid.conf
+    owner=root
+    group=squid
+    mode="u=rw,g=r,o="
+  notify: restart squid
+
+# Set squid not to clear cache on restart
+- name: Copy configuration file for etc/sysconfig/squid.
+  copy: >
+    src=/etc/sysconfig/squid
+    dest=/etc/sysconfig/squid
+    owner=root
+    group=root
+    mode="u=rw,g=r,o=r"
+  notify: restart squid
+
+# We want pretty aggressive log rotate for squid.
+- name: Copy configuration file for squid's logrotate
+  copy: >
+    src=/etc/logrotate.d/squid
+    dest=/etc/logrotate.d/squid
+    owner=root
+    group=root
+    mode="u=rw,g=r,o=r"
+
+- name: Ensure squid is running and enabled.
+  service: name=squid state=started enabled=yes
