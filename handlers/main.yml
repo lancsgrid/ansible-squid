@@ -1,8 +1,8 @@
 ---
 # Handlers for ansible-squid.
 
-- name: Restart iptables
+- name: restart iptables
   service: name=iptables state=restarted
 
-- name: Restart squid
+- name: restart squid
   service: name=squid state=restarted
