@@ -15,7 +15,7 @@
 # Sets ACLs and cache location.
 - name: Copy configuration file for squid.conf.
   copy: >
-    src=/etc/squid/squid.conf
+    src=etc/squid/squid.conf
     dest=/etc/squid/squid.conf
     owner=root
     group=squid
@@ -25,7 +25,7 @@
 # Set squid not to clear cache on restart
 - name: Copy configuration file for etc/sysconfig/squid.
   copy: >
-    src=/etc/sysconfig/squid
+    src=etc/sysconfig/squid
     dest=/etc/sysconfig/squid
     owner=root
     group=root
@@ -35,7 +35,7 @@
 # We want pretty aggressive log rotate for squid.
 - name: Copy configuration file for squid's logrotate
   copy: >
-    src=/etc/logrotate.d/squid
+    src=etc/logrotate.d/squid
     dest=/etc/logrotate.d/squid
     owner=root
     group=root

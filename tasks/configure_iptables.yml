@@ -3,7 +3,7 @@
 
 - name: Copy configs for iptables
   copy: >
-    src=/etc/sysconfig/iptables
+    src=etc/sysconfig/iptables
     dest=/etc/sysconfig/iptables
     owner=root
     group=root
