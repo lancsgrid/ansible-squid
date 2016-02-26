@@ -12,7 +12,6 @@
     group=squid
     mode="u=rwx,g=rx,o=rx"
     setype=squid_cache_t
-    recurse=yes
 
 # Sets ACLs and cache location.
 - name: Copy configuration file for squid.conf.
