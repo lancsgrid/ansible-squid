@@ -1,0 +1,3 @@
+---
+- include: install_squid.yml
+- include: configure_iptables.yml

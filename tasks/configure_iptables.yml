@@ -1,0 +1,11 @@
+---
+# This task copies the configs for the squid's iptables.
+
+- name: Copy configs for iptables
+  copy: >
+    src=etc/sysconfig/iptables
+    dest=/etc/sysconfig/iptables
+    owner=root
+    group=root
+    mode="u=rw,g=,o="
+  notify: restart iptables

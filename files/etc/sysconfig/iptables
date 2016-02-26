@@ -1,0 +1,66 @@
+# Firewall configuration written by system-config-firewall
+# Manual customization of this file is not recommended.
+*filter
+:INPUT ACCEPT [0:0]
+:FORWARD ACCEPT [0:0]
+:OUTPUT ACCEPT [0:0]
+-A INPUT -m state --state ESTABLISHED,RELATED -j ACCEPT
+-A INPUT -p icmp -j ACCEPT
+-A INPUT -i lo -j ACCEPT
+-A INPUT -i eth1 -j ACCEPT
+#Permit	access from 32
+-A INPUT -s 148.88.67.50 -m state --state NEW -m tcp -p tcp --dport 22 -j ACCEPT
+#syslog
+-A INPUT  -m udp -p udp --dport 514 -j ACCEPT
+-A INPUT  -m tcp -p tcp --dport 601 -j ACCEPT
+-A INPUT  -m udp -p udp --dport 601 -j ACCEPT
+#open squid to all to get shoal to work
+-A INPUT -p tcp -m tcp --dport 3128 -j ACCEPT
+# nagios py-heimdallr.lancs.ac.uk
+-A INPUT -s 148.88.67.110 -m state --state NEW -m tcp -p tcp --dport 5666 -j ACCEPT
+-A INPUT -s 10.42.67.126 -m state --state NEW -m tcp -p tcp --dport 5666 -j ACCEPT
+
+#begin Frontier squid stuff hacked from 45
+# Frontier squid access from Edin
+-A INPUT -s 129.215.94.0/23 -p tcp -m state --state NEW -m tcp --dport 3128 -j ACCEPT
+-A INPUT -s 194.81.254.0/23 -p tcp -m state --state NEW -m tcp --dport 3128 -j ACCEPT
+# Frontier squid access from Glasgow
+-A INPUT -s 130.209.239.0/26 -p tcp -m state --state NEW -m tcp --dport 3128 -j ACCEPT
+# Frontier squid access from HEC
+-A INPUT -s 148.88.23.14 -p tcp -m state --state NEW -m tcp --dport 3128 -j ACCEPT
+# Frontier squid access from DATACENTRED
+-A INPUT -s 185.43.218.128/25 -p tcp -m state --state NEW -m tcp --dport 3128 -j ACCEPT
+# Frontier squid access from MAN
+-A INPUT -m iprange --src-range 195.194.104.0-195.194.110.255 -p tcp -m state --state NEW -m tcp --dport 3128 -j ACCEPT
+#Frontier monitoring access
+-A INPUT -p udp -m udp --dport 3401 -j ACCEPT
+-A INPUT -p tcp -m tcp --dport 3401 -j ACCEPT
+#squid access for HEC external
+-A INPUT -s 194.80.35.128/25 -p tcp -m state --state NEW -m tcp --dport 3128 -j ACCEPT
+# hep access
+-A INPUT -s 148.88.188.0/22 -p tcp -m state --state NEW -m tcp --dport 3128 -j ACCEPT
+-A INPUT -s 148.88.40.17 -p tcp -m state --state NEW -m tcp --dport 3128 -j ACCEPT
+-A INPUT -s 148.88.40.18 -p tcp -m state --state NEW -m tcp --dport 3128 -j ACCEPT
+-A INPUT -s 148.88.40.19 -p tcp -m state --state NEW -m tcp --dport 3128 -j ACCEPT
+# https for service nodes
+#-A INPUT -s 194.80.35.30 -p tcp -m state --state NEW -m tcp --dport 443 -j ACCEPT
+#-A INPUT -s 148.88.189.172 -p tcp -m state --state NEW -m tcp --dport 443 -j ACCEPT
+# http for service nodes
+#-A INPUT -s 148.88.189.172 -p tcp -m state --state NEW -m tcp --dport 80 -j ACCEPT
+#-A INPUT -s 194.80.35.0/24 -p tcp -m state --state NEW -m tcp --dport 80 -j ACCEPT
+#-A INPUT -s 148.88.188.0/24 -p udp -m state --state NEW -m udp --dport 21 -j ACCEPT 
+#end hacked 45 squid stuff
+#from 34
+# access to squid from all hep machines, and the VAC machine fal-43
+-A INPUT -s 148.88.40.17 -p tcp -m tcp --dport 3128 -j ACCEPT
+-A INPUT -s 148.88.40.18 -p tcp -m tcp --dport 3128 -j ACCEPT
+-A INPUT -s 148.88.40.19 -p tcp -m tcp --dport 3128 -j ACCEPT
+-A INPUT -s 148.88.188.0/22 -p tcp -m tcp --dport 3128 -j ACCEPT
+-A INPUT -s 194.80.35.42 -p tcp -m tcp --dport 3128 -j ACCEPT
+#-A INPUT -m state --state ESTABLISHED,RELATED -j ACCEPT
+# squid access from DATACENTRED
+#-A INPUT -s 85.199.252.0/22 -p tcp -m state --state NEW -m tcp --dport 3128 -j ACCEPT
+#end 34
+-A INPUT -j REJECT --reject-with icmp-host-prohibited
+-A FORWARD -j REJECT --reject-with icmp-host-prohibited
+COMMIT
