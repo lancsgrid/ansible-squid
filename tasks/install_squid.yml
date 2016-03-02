@@ -15,8 +15,8 @@
 
 # Sets ACLs and cache location.
 - name: Copy configuration file for squid.conf.
-  copy: >
-    src=etc/squid/squid.conf
+  template: >
+    src=etc/squid/squid.conf.j2
     dest=/etc/squid/squid.conf
     owner=root
     group=squid
