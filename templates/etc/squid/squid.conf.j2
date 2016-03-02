@@ -40,19 +40,15 @@ acl SNMPHOSTS src 128.142.0.0/16 localhost
 acl SNMPMON snmp_community public
 
 
-#acls for shared cluster
-
+# ACLs from ansible variables
 {% for acl_name, acl_ipaddr in acl_src.iteritems() %}
 acl {{ acl_name }} src {{ acl_ipaddr }}
 {% endfor %}
 
+{% for acl_name, acl_ipaddr in acl_srcdom.iteritems() %}
+acl {{ acl_name }} srcdom_regex {{ acl_ipaddr }}
+{% endfor %}
 
-acl NET_LOCAL src 10.41.0.0/8
-acl HEC src 194.80.35.128/25
-acl LOKI src 10.42.67.126
-
-#acls regex for EPP cluster
-acl EPP_CLUSTER srcdom_regex ^(((lap.*)|(py-lar.*)|(pyb04(60|8b)000..))\.lancs\.ac\.uk)$
 
 
 
@@ -121,15 +117,15 @@ http_access allow cvmfs
 http_access allow ATLASFRONTIER
 http_access allow ATLASFRONTIER_REGEX
 
-http_access allow HEC
-http_access allow NET_LOCAL
-http_access allow LOKI
-http_access allow EPP_CLUSTER
-
 {% for acl_name, acl_ipaddr in acl_src.iteritems() %}
 http_access allow {{ acl_name }}
 {% endfor %}
 
+{% for acl_name, acl_ipaddr in acl_srcdom.iteritems() %}
+http_access allow {{ acl_name }}
+{% endfor %}
+
+{% raw %}
 
 # And finally deny all other access to this proxy
 http_access deny all
@@ -165,3 +161,4 @@ refresh_pattern ^ftp:		1440	20%	10080
 refresh_pattern ^gopher:	1440	0%	1440
 refresh_pattern -i (/cgi-bin/|\?) 0	0%	0
 refresh_pattern .		0	20%	4320
+{% endraw %}
