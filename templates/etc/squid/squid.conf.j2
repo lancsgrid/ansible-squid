@@ -134,6 +134,7 @@ http_access allow {{ acl_name }}
 {% endfor %}
 {% endif %}
 
+{% raw %}
 # And finally deny all other access to this proxy
 http_access deny all
 
