@@ -1,11 +1,43 @@
 ---
 # This task copies the configs for the squid's iptables.
+- block:
+  - name: Disable firewalld
+    service: >
+      name=firewalld
+      state=stopped
+      enabled=no
+
+  - name: Install iptables
+    yum: name=iptables-services state=present
+
+  - name: Ensure iptables is started
+    service: >
+      name=iptables
+      state=started
+      enabled=yes
+
+  - name: Ensure ip6tables is started
+    service: >
+      name=ip6tables
+      state=started
+      enabled=yes
+
+  when: ansible_os_family == "RedHat" and ansible_distribution_major_version >= 7
 
 - name: Copy configs for iptables
-  copy: >
-    src=etc/sysconfig/iptables
+  template: >
+    src=etc/sysconfig/iptables.j2
     dest=/etc/sysconfig/iptables
     owner=root
     group=root
     mode="u=rw,g=,o="
   notify: restart iptables
+
+- name: Copy configs for iptables
+  copy: >
+    src=etc/sysconfig/ip6tables
+    dest=/etc/sysconfig/ip6tables
+    owner=root
+    group=root
+    mode="u=rw,g=,o="
+  notify: restart ip6tables
