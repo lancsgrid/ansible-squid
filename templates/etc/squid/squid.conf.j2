@@ -1,19 +1,13 @@
-
 #
 # Recommended minimum configuration:
 #
+
+{% if ansible_os_family == "RedHat" and ansible_distribution_major_version|int < 7 %}
+{# these acls are included by default in squid 3.2 #}
 acl manager proto cache_object
 acl localhost src 127.0.0.1/32 ::1
 acl to_localhost dst 127.0.0.0/8 0.0.0.0/32 ::1
-
-# Example rule allowing access from your local networks.
-# Adapt to list your (internal) IP networks from where browsing
-# should be allowed
-#acl localnet src 10.0.0.0/8	# RFC1918 possible internal network
-#acl localnet src 172.16.0.0/12	# RFC1918 possible internal network
-#acl localnet src 192.168.0.0/16	# RFC1918 possible internal network
-#acl localnet src fc00::/7       # RFC 4193 local private network range
-#acl localnet src fe80::/10      # RFC 4291 link-local (directly plugged) machines
+{% endif %}
 
 acl SSL_ports port 443
 acl Safe_ports port 80		# http
@@ -26,62 +20,75 @@ acl Safe_ports port 280		# http-mgmt
 acl Safe_ports port 488		# gss-http
 acl Safe_ports port 591		# filemaker
 acl Safe_ports port 777		# multiling http
+
 acl CONNECT method CONNECT
 
 acl snmppublic snmp_community public
 
-acl manager proto cache_object
 
-acl SSL_ports port 443
-acl CONNECT method CONNECT
+
 acl shoutcast rep_header X-HTTP09-First-Line ^ICY.[0-9]
 acl apache rep_header Server ^Apache
 acl SNMPHOSTS src 128.142.0.0/16 localhost 
 acl SNMPMON snmp_community public
 
+# Auto generated from ansible defaults or user provided variables
 
-# ACLs from ansible variables
-{% if acl_src is defined %}
-{% for acl_name, acl_ipaddr in acl_src.iteritems() %}
-acl {{ acl_name }} src {{ acl_ipaddr }}
+
+{% for acl_types in acl_rules %}
+{% for acl_type, rules in acl_types.iteritems() %}
+{% for rule in rules %}
+acl NETWORK_{{ acl_type |upper }} {{ acl_type }} {{ rule }}
 {% endfor %}
-{% endif %}
-
-{% if acl_srcdom is defined %}
-{% for acl_name, acl_ipaddr in acl_srcdom.iteritems() %}
-acl {{ acl_name }} srcdom_regex {{ acl_ipaddr }}
 {% endfor %}
-{% endif %}
+{% endfor %}
 
+# List of destinations from CERN.
 
+acl grid_ca_stuff urlpath_regex \.crl$ \.r0$ \.pem$ \.der$ \.crl_url$
+acl cvmfs url_regex ^http://cernvm-webfs.cern.ch
+acl cernone   url_regex ^http://cvmfs-stratum-one.cern.ch
+acl cernonep   url_regex ^http://stratum-one-lbp.cern.ch
+acl cernzero  url_regex ^http://cvmfs-stratum-zero.cern.ch
+acl desyone   url_regex ^http://grid-cvmfs-one.desy.de
+acl ralone    url_regex ^http://cernvmfs.gridpp.rl.ac.uk
+acl twone     url_regex ^http://cvmfs02.grid.sinica.edu.tw
+acl hepvm     url_regex ^http://hepvm.cern.ch
+acl bnlone    url_regex ^http://cvmfs.racf.bnl.gov
+acl fnalone   url_regex ^http://cvmfs.fnal.gov
+acl lhcbnight url_regex ^http://volhcb28.cern.ch
+acl atlasone  url_regex ^http://voatlas179.cern.ch
+acl atlastwo  url_regex ^http://cvmfs-atlas-nightlies.cern.ch
+acl cmsib     url_regex ^http://sdtcvmfs.cern.ch
+acl caproxylb url_regex ^http://caproxylb
+acl caproxylbp url_regex ^http://caproxylbp
+acl swrepurl  url_regex ^http://swrep
+acl lxmaster  url_regex ^http://lxmaster
 
+# openscience.                                                                                                        
+acl egigridpp url_regex ^http://cvmfs-egi.gridpp.rl.ac.uk
+acl nikhef url_regex ^http://klei.nikhef.nl
+acl opensci url_regex ^http://cvmfs-s1bnl.opensciencegrid.org
+acl s1fnal url_regex ^http://cvmfs-s1fnal.opensciencegrid.org
+acl taiwan url_regex ^http://cvmfsrep.grid.sinica.edu.tw
 
-# CVMFS
-acl cvmfs dst cvmfs-stratum-one.cern.ch
-acl cvmfs dst cernvmfs.gridpp.rl.ac.uk
-acl cvmfs dst cvmfs.racf.bnl.gov
-acl cvmfs dst cvmfs02.grid.sinica.edu.tw
-acl cvmfs dst cvmfs.fnal.gov
-acl cvmfs dst cvmfs-atlas-nightlies.cern.ch
-acl cvmfs dst cvmfs-egi.gridpp.rl.ac.uk
-acl cvmfs dst klei.nikhef.nl
-acl cvmfs dst cvmfsrepo.lcg.triumf.ca
-acl cvmfs dst cvmfsrep.grid.sinica.edu.tw
-acl cvmfs dst cvmfs-s1bnl.opensciencegrid.org
-acl cvmfs dst cvmfs-s1fnal.opensciencegrid.org
+# Frontier                                                                                                            
+acl front_cern         url_regex  ^http://atlasfrontier.*cern.ch
+acl front_ai_cern2     url_regex  ^http://atlasfrontier-ai.cern.ch
+acl front_ai_cern      url_regex  ^http://atlast0frontier-ai.cern.ch
+acl front_in2p3        url_regex  ^http://cc.*in2p3.fr
+acl front_cern_aiatlas url_regex  ^http://aiatlas.cern.ch
+acl front_ral          url_regex  ^http://lcgft-atlas.gridpp.rl.ac.uk
+acl front_ral_other    url_regex  ^http://lcgvo-frontier.gridpp.rl.ac.uk
 
-# ATLAS FRONTIER
-acl ATLASFRONTIER dst atlassq1-fzk.gridka.de atlasfrontier.cern.ch squid-frontier.usatlas.bnl.gov lcgft-atlas.gridpp.rl.ac.uk frontier.triumf.ca ccsqfatlasli01.in2p3.fr ccfrontier.in2p3.fr
-acl ATLASFRONTIER_REGEX dstdom_regex ^(frontier.*\.racf\.bnl\.gov|atlas.*frontier.*\.cern\.ch|cc.*\.in2p3\.fr|lcg.*\.gridpp\.rl\.ac\.uk|(.*frontier.*|tier1nfs)\.triumf\.ca)$
+# Legacy Frontier for tests
 
-# Other
-acl CMSFRONTIER dst cmsfrontier.cern.ch
-acl LHCB dst lhcbproject.web.cern.ch
+acl front_cms	      url_regex  ^http://cmsfrontier.cern.ch
 
+# WLCG Monitor                                                                                                       
+acl HOST_MONITOR src
+acl snmppublic snmp_community public
 
-#
-# Recommended minimum Access Permission configuration:
-#
 # Only allow cachemgr access from localhost
 http_access allow manager localhost
 http_access deny manager
@@ -95,46 +102,63 @@ http_access deny CONNECT !SSL_ports
 # We strongly recommend the following be uncommented to protect innocent
 # web applications running on the proxy server who think the only
 # one who can access services on "localhost" is a local user
-http_access deny to_localhost
 
-#monitoring gumpf
-acl HOST_MONITOR src 127.0.0.1/32 128.142.0.0/16 188.184.128.0/17 188.185.128.0/17
-acl snmppublic snmp_community public
+{% if ansible_os_family == "RedHat" and ansible_distribution_major_version|int < 7 %}
+http_access deny to_localhost
+{% endif %}
+
+{% for acl_types in acl_rules %}
+{% for acl_type, rules in acl_types.iteritems() %}
+http_access allow NETWORK_{{ acl_type |upper }} grid_ca_stuff
+http_access allow NETWORK_{{ acl_type |upper }} cvmfs
+http_access allow NETWORK_{{ acl_type |upper }} cernone
+http_access allow NETWORK_{{ acl_type |upper }} cernonep
+http_access allow NETWORK_{{ acl_type |upper }} cernzero
+http_access allow NETWORK_{{ acl_type |upper }} desyone
+#ralone blocked since broken.
+#http_access allow NETWORK_{{ acl_type |upper }} ralone
+http_access allow NETWORK_{{ acl_type |upper }} twone
+http_access allow NETWORK_{{ acl_type |upper }} hepvm
+http_access allow NETWORK_{{ acl_type |upper }} bnlone
+http_access allow NETWORK_{{ acl_type |upper }} fnalone
+http_access allow NETWORK_{{ acl_type |upper }} lhcbnight
+http_access allow NETWORK_{{ acl_type |upper }} atlasone
+http_access allow NETWORK_{{ acl_type |upper }} atlastwo
+http_access allow NETWORK_{{ acl_type |upper }} cmsib
+http_access allow NETWORK_{{ acl_type |upper }} caproxylb
+http_access allow NETWORK_{{ acl_type |upper }} caproxylbp
+http_access allow NETWORK_{{ acl_type |upper }} swrepurl
+http_access allow NETWORK_{{ acl_type |upper }} lxmaster
+http_access allow NETWORK_{{ acl_type |upper }} egigridpp
+http_access allow NETWORK_{{ acl_type |upper }} nikhef
+http_access allow NETWORK_{{ acl_type |upper }} opensci
+http_access allow NETWORK_{{ acl_type |upper }} s1fnal
+http_access allow NETWORK_{{ acl_type |upper }} taiwan
+http_access allow NETWORK_{{ acl_type |upper }} front_cern
+http_access allow NETWORK_{{ acl_type |upper }} front_ai_cern2
+http_access allow NETWORK_{{ acl_type |upper }} front_ai_cern
+http_access allow NETWORK_{{ acl_type |upper }} front_in2p3
+http_access allow NETWORK_{{ acl_type |upper }} front_cern_aiatlas
+http_access allow NETWORK_{{ acl_type |upper }} front_ral
+http_access allow NETWORK_{{ acl_type |upper }} front_ral_other
+http_access allow NETWORK_{{ acl_type |upper }} front_cms
+{% endfor %}
+{% endfor %}
+
+
+http_access allow localhost
 
 snmp_access allow snmppublic HOST_MONITOR
 snmp_access deny all
 snmp_port 3401
-#
-# INSERT YOUR OWN RULE(S) HERE TO ALLOW ACCESS FROM YOUR CLIENTS
-#
 
 # Example rule allowing access from your local networks.
 # Adapt localnet in the ACL section to list your (internal) IP networks
 # from where browsing should be allowed
-#http_access allow localnet
-http_access allow localhost
 
-http_access allow CMSFRONTIER
-http_access allow LHCB
-http_access allow cvmfs
-
-http_access allow ATLASFRONTIER
-http_access allow ATLASFRONTIER_REGEX
-
-
-{% if acl_src is defined %}
-{% for acl_name, acl_ipaddr in acl_src.iteritems() %}
-http_access allow {{ acl_name }}
-{% endfor %}
-{% endif %}
-
-{% if acl_srcdom is defined %}
-{% for acl_name, acl_ipaddr in acl_srcdom.iteritems() %}
-http_access allow {{ acl_name }}
-{% endfor %}
-{% endif %}
 
 {% raw %}
+
 # And finally deny all other access to this proxy
 http_access deny all
 
