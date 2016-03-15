@@ -5,25 +5,25 @@
     name=firewalld
     state=stopped
     enabled=no
-  when: ansible_os_family == "RedHat" and ansible_distribution_major_version >= 7
+  when: ansible_os_family == "RedHat" and ansible_distribution_major_version|int == 7
 
 - name: Install iptables
   yum: name=iptables-services state=present
-  when: ansible_os_family == "RedHat" and ansible_distribution_major_version >= 7
+  when: ansible_os_family == "RedHat" and ansible_distribution_major_version|int == 7
 
 - name: Ensure iptables is started
   service: >
     name=iptables
     state=started
     enabled=yes
-  when: ansible_os_family == "RedHat" and ansible_distribution_major_version >= 7
+  when: ansible_os_family == "RedHat" and ansible_distribution_major_version|int == 7
 
 - name: Ensure ip6tables is started
   service: >
     name=ip6tables
     state=started
     enabled=yes
-  when: ansible_os_family == "RedHat" and ansible_distribution_major_version >= 7
+  when: ansible_os_family == "RedHat" and ansible_distribution_major_version|int == 7
 
 
 - name: Copy configs for iptables
