@@ -115,8 +115,8 @@ http_access allow NETWORK_{{ acl_type |upper }} cernone
 http_access allow NETWORK_{{ acl_type |upper }} cernonep
 http_access allow NETWORK_{{ acl_type |upper }} cernzero
 http_access allow NETWORK_{{ acl_type |upper }} desyone
-#ralone blocked since broken.
-#http_access allow NETWORK_{{ acl_type |upper }} ralone
+#ralone blocked since broken. # not sure why blocked, re-enabled.
+http_access allow NETWORK_{{ acl_type |upper }} ralone
 http_access allow NETWORK_{{ acl_type |upper }} twone
 http_access allow NETWORK_{{ acl_type |upper }} hepvm
 http_access allow NETWORK_{{ acl_type |upper }} bnlone
